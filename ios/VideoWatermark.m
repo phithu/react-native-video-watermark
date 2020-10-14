@@ -30,7 +30,7 @@ RCT_EXPORT_METHOD(convert:(NSString *)videoUri imageUri:(nonnull NSString *)imag
     [compositionAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.duration) ofTrack:clipAudioTrack atTime:kCMTimeZero error:nil];
     
     [compositionVideoTrack setPreferredTransform:[[[videoAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0] preferredTransform]];
-        
+    
     CGSize sizeOfVideo = CGSizeApplyAffineTransform(clipVideoTrack.naturalSize, clipVideoTrack.preferredTransform);
     sizeOfVideo.width = fabs(sizeOfVideo.width);
     
@@ -38,31 +38,9 @@ RCT_EXPORT_METHOD(convert:(NSString *)videoUri imageUri:(nonnull NSString *)imag
     UIImage *myImage=[UIImage imageWithContentsOfFile:imageUri];
     
     UIGraphicsBeginImageContext(sizeOfVideo);
+
+    [myImage drawInRect:CGRectMake(15, (sizeOfVideo.height - 40 - 15 ), 50, 40)];
     
-
-    int watermarkPositionInt = [MyFunctions getWatermarkInt:watermarkPosition];
-    switch(watermarkPositionInt) {
-        case 1:
-            [myImage drawInRect:CGRectMake(0, 0, 300, 300)];
-            break;        
-
-        case 2:
-            [myImage drawInRect:CGRectMake(0, sizeOfVideo.height -300, 300, 300)];
-            break;        
-
-        case 3:
-            [myImage drawInRect:CGRectMake(sizeOfVideo.width - 300, 0, 300, 300)];
-            break;        
-
-        case 4:
-            [myImage drawInRect:CGRectMake(sizeOfVideo.width -300, sizeOfVideo.height - 300, 300, 300)];
-            break;     
-            
-        default:
-            [myImage drawInRect:CGRectMake(0, 0, 300, 300)];
-            break;
-    }
-    // [myImage drawInRect:CGRectMake(0, 0, sizeOfVideo.width, sizeOfVideo.height)];
     UIImage *destImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     myImage = destImage;
@@ -122,12 +100,22 @@ RCT_EXPORT_METHOD(convert:(NSString *)videoUri imageUri:(nonnull NSString *)imag
     [exportSession exportAsynchronouslyWithCompletionHandler:^{
         switch (exportSession.status)
         {
+            case AVAssetExportSessionStatusUnknown:
+                <#code#>
+                break;
+            case AVAssetExportSessionStatusWaiting:
+                <#code#>
+                break;
+            case AVAssetExportSessionStatusExporting:
+                <#code#>
+                break;
             case AVAssetExportSessionStatusCompleted:
                 NSLog(@"Export OK");
-                callback(@[destinationPath]);
+                callback(@[[NSNull null], destinationPath]);
                 break;
             case AVAssetExportSessionStatusFailed:
                 NSLog (@"AVAssetExportSessionStatusFailed: %@", exportSession.error);
+                callback(@[@"AVAssetExportSessionStatusFailed", [NSNull null]]);
                 break;
             case AVAssetExportSessionStatusCancelled:
                 NSLog(@"Export Cancelled");
