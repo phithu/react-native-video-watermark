@@ -8,13 +8,12 @@
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(convert:(NSString *)videoUri imageUri:(nonnull NSString *)imageUri watermarkPosition:(nonnull NSString *)watermarkPosition callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(convert:(NSString *)videoUri callback:(RCTResponseSenderBlock)callback)
 {
-    RCTLogInfo(@"Checking passed variables %@ %@ %@", videoUri, imageUri, watermarkPosition);
-    [self watermarkVideoWithImage:videoUri imageUri:imageUri watermarkPosition:watermarkPosition callback:callback];
+    [self watermarkVideoWithImage:videoUri callback:callback];
 }
 
--(void)watermarkVideoWithImage:(NSString *)videoUri imageUri:(NSString *)imageUri watermarkPosition:(NSString *)watermarkPosition callback:(RCTResponseSenderBlock)callback
+-(void)watermarkVideoWithImage:(NSString *)videoUri callback:(RCTResponseSenderBlock)callback
 {
     
     AVURLAsset* videoAsset = [[AVURLAsset alloc]initWithURL:[NSURL fileURLWithPath:videoUri] options:nil];
@@ -35,16 +34,15 @@ RCT_EXPORT_METHOD(convert:(NSString *)videoUri imageUri:(nonnull NSString *)imag
     sizeOfVideo.width = fabs(sizeOfVideo.width);
     
     //Image of watermark
-    UIImage *myImage=[UIImage imageWithContentsOfFile:imageUri];
+    UIImage *myImage=[UIImage imageNamed:@"watermark.png"];
     
     UIGraphicsBeginImageContext(sizeOfVideo);
     
-    [myImage drawInRect:CGRectMake(0, (sizeOfVideo.height - 40), 50, 40)];
+    [myImage drawInRect:CGRectMake(0, (sizeOfVideo.height - 56), 70, 56)];
     
     UIImage *destImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     myImage = destImage;
-    
     
     CALayer *layerCa = [CALayer layer];
     layerCa.contents = (id)myImage.CGImage;
