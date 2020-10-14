@@ -38,8 +38,8 @@ RCT_EXPORT_METHOD(convert:(NSString *)videoUri imageUri:(nonnull NSString *)imag
     UIImage *myImage=[UIImage imageWithContentsOfFile:imageUri];
     
     UIGraphicsBeginImageContext(sizeOfVideo);
-
-    [myImage drawInRect:CGRectMake(15, (sizeOfVideo.height - 40 - 15 ), 50, 40)];
+    
+    [myImage drawInRect:CGRectMake(0, (sizeOfVideo.height - 40), 50, 40)];
     
     UIImage *destImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
@@ -101,21 +101,18 @@ RCT_EXPORT_METHOD(convert:(NSString *)videoUri imageUri:(nonnull NSString *)imag
         switch (exportSession.status)
         {
             case AVAssetExportSessionStatusUnknown:
-                <#code#>
                 break;
             case AVAssetExportSessionStatusWaiting:
-                <#code#>
                 break;
             case AVAssetExportSessionStatusExporting:
-                <#code#>
                 break;
             case AVAssetExportSessionStatusCompleted:
                 NSLog(@"Export OK");
-                callback(@[[NSNull null], destinationPath]);
+                callback(@[destinationPath]);
                 break;
             case AVAssetExportSessionStatusFailed:
                 NSLog (@"AVAssetExportSessionStatusFailed: %@", exportSession.error);
-                callback(@[@"AVAssetExportSessionStatusFailed", [NSNull null]]);
+                callback(@[[NSNull null]]);
                 break;
             case AVAssetExportSessionStatusCancelled:
                 NSLog(@"Export Cancelled");
@@ -125,4 +122,3 @@ RCT_EXPORT_METHOD(convert:(NSString *)videoUri imageUri:(nonnull NSString *)imag
 }
 
 @end
-
