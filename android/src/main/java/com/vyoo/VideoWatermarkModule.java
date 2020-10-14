@@ -12,7 +12,11 @@ import com.daasuu.mp4compose.filter.GlWatermarkFilter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.graphics.BitmapFactory;
@@ -32,11 +36,26 @@ public class VideoWatermarkModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void convert(String videoPath, String imagePath, String watermarkPosition, Callback callback) {
-        watermarkVideoWithImage(videoPath, imagePath, watermarkPosition, callback);
+    public void convert(String videoPath, Callback callback) {
+        watermarkVideoWithImage(videoPath, callback);
     }
 
-    public void watermarkVideoWithImage(String videoPath, String imagePath, String watermarkPosition, final Callback callback) {
+    public static Bitmap getBitmapFromAsset(Context context, String filePath) {
+        AssetManager assetManager = context.getAssets();
+
+        InputStream istr;
+        Bitmap bitmap = null;
+        try {
+            istr = assetManager.open(filePath);
+            bitmap = BitmapFactory.decodeStream(istr);
+        } catch (IOException e) {
+            // handle exception
+        }
+
+        return bitmap;
+    }
+
+    public void watermarkVideoWithImage(String videoPath, final Callback callback) {
         File destFile = new File(this.getReactApplicationContext().getFilesDir(), "converted.mp4");
         if (!destFile.exists()) {
             try {
@@ -46,57 +65,29 @@ public class VideoWatermarkModule extends ReactContextBaseJavaModule {
             }
         }
         final String destinationPath = destFile.getPath();
-        GlWatermarkFilter.Position wtrkMrkPos;
-        switch (watermarkPosition) {
+        new Mp4Composer(Uri.fromFile(new File(videoPath)), destinationPath, reactContext)
+                .filter(new GlWatermarkFilter(getBitmapFromAsset(reactContext, "images/watermark.png"), GlWatermarkFilter.Position.LEFT_BOTTOM))
+                .listener(new Mp4Composer.Listener() {
+                    @Override
+                    public void onProgress(double progress) {
+                        Log.e("Progress", progress + "");
+                    }
 
-            case "LEFT_TOP":
-                wtrkMrkPos = GlWatermarkFilter.Position.LEFT_TOP;
-                break;
+                    @Override
+                    public void onCompleted() {
+                        callback.invoke(destinationPath);
+                    }
 
-            case "LEFT_BOTTOM":
-                wtrkMrkPos = GlWatermarkFilter.Position.LEFT_BOTTOM;
-                break;
+                    @Override
+                    public void onCanceled() {
 
-            case "RIGHT_TOP":
-                wtrkMrkPos = GlWatermarkFilter.Position.RIGHT_TOP;
-                break;
+                    }
 
-            case "RIGHT_BOTTOM":
-                wtrkMrkPos = GlWatermarkFilter.Position.RIGHT_BOTTOM;
-                break;
-
-            default:
-                wtrkMrkPos = GlWatermarkFilter.Position.LEFT_TOP;
-                break;
-
-        }
-        try {
-            new Mp4Composer(Uri.fromFile(new File(videoPath)), destinationPath, reactContext)
-                    .filter(new GlWatermarkFilter(BitmapFactory.decodeStream(reactContext.getContentResolver().openInputStream(Uri.fromFile(new File(imagePath)))), wtrkMrkPos))
-                    .listener(new Mp4Composer.Listener() {
-                        @Override
-                        public void onProgress(double progress) {
-                            Log.e("Progress", progress + "");
-                        }
-
-                        @Override
-                        public void onCompleted() {
-                            callback.invoke(destinationPath);
-                        }
-
-                        @Override
-                        public void onCanceled() {
-
-                        }
-
-                        @Override
-                        public void onFailed(Exception exception) {
-                            exception.printStackTrace();
-                            callback.invoke(null);
-                        }
-                    }).start();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+                    @Override
+                    public void onFailed(Exception exception) {
+                        exception.printStackTrace();
+                        callback.invoke(null);
+                    }
+                }).start();
     }
 }
