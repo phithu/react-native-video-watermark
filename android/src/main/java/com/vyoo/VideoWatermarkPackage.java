@@ -1,4 +1,4 @@
-package me.vyoo;
+package com.vyoo;
 
 import java.util.Arrays;
 import java.util.Collections;
