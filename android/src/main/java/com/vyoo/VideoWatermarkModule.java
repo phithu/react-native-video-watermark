@@ -52,8 +52,7 @@ public class VideoWatermarkModule extends ReactContextBaseJavaModule {
             // handle exception
         }
 
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(
-                bitmap, 300, 252, false);
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, 200, 168, false);
 
         return resizedBitmap;
     }
