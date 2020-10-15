@@ -1,4 +1,4 @@
-package me.vyoo;
+package com.vyoo;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
